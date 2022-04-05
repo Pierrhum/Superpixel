@@ -18,7 +18,7 @@ private:
     double S;
     Image *img;
 
-    vector<vector<double>> centers;
+    vector< vector<double> > centers;
 
     void InitCenters();
 

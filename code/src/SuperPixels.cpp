@@ -2,7 +2,7 @@
 // Created by pierrhum on 05/04/2022.
 //
 
-#include <cstdlib>
+#include <cfloat>
 #include "SuperPixels.h"
 
 SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double Step) {
@@ -20,13 +20,13 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
     /** TODO : Initialisation de la carte des superpixels et de la carte des distances.
      * Les distances sont initialisées à l'infini et les pixels sont attribués au superpixel 0.
      */
-    int* clusters = (int*)malloc(this->img->nTaille * sizeof(int));
-    float* distances = (float*)malloc(this->img->nTaille * sizeof(float));
+    std::vector<int> clusters;
+    std::vector<float> distances;
 
     for(int i = 0; i < this->img->nTaille; i++) {
 
-        clusters[i] = 0;
-        distances[i] = FLT_MAX;
+        clusters.push_back(0);
+        distances.push_back(FLT_MAX);
     }
 
     /** TODO : Boucle : étape 1.
@@ -34,7 +34,7 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
      * Si la distance est plus petite que celle en mémoire pour le pixel, elle est modifiée en mémoire
      * et le pixel fait maintenant partie du superpixel.
      */
-    for(int i = 0; i < center.size(); i++) {
+    for(int i = 0; i < centers.size(); i++) {
 
         
     }
@@ -48,8 +48,6 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
       * deux itérations soit plus petit qu'un certain seuil.
       */
 
-    free(clusters)
-    free(distances);
 }
 
 Image *SuperPixels::GetImage() {

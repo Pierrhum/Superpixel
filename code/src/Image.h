@@ -14,14 +14,13 @@
 typedef unsigned char OCTET;
 
 class Image : public Image_ppm {
-private:
-    int nTaille = 0;
-    int nTaille3 = 0;
-
+	
 public:
     OCTET *ImgData;
     int nH = 0;
     int nW = 0;
+    int nTaille = 0;
+    int nTaille3 = 0;
 
     Image() {};
     Image(char* fileName);
