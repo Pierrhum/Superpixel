@@ -1,6 +1,6 @@
-OBJS	= Image_ppm.o Image.o main.o
-SOURCE	= Image_ppm.cpp Image.cpp main.cpp
-HEADER	= Image_ppm.h Image.hpp
+OBJS	= Image_ppm.o Image.o SuperPixels.o main.o
+SOURCE	= Image_ppm.cpp Image.cpp SuperPixels.cpp main.cpp
+HEADER	= Image_ppm.h Image.hpp SuperPixels.h
 OUT	= prog
 CC	 = g++
 FLAGS	 = -g -c -Wall
