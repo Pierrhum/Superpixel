@@ -4,11 +4,18 @@
 
 #include "SuperPixels.h"
 
-SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double Step) {
+#define R 0
+#define G 1
+#define B 2
+#define X 3
+#define Y 4
+
+SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double Step, int weight) {
     this->img = input;
     this->N = nbPixels;
     this->K = nbSuperPixels;
     this->S = Step;
+    this->m = weight;
 
     /** ALGO SLIC **/
     
@@ -19,20 +26,46 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
     /** TODO : Initialisation de la carte des superpixels et de la carte des distances.
      * Les distances sont initialisées à l'infini et les pixels sont attribués au superpixel 0.
      */
-
-    for(int i = 0; i < N; i++) { // N = NbPixels
-        clusters.push_back(0);
-        distances.push_back(FLT_MAX);
+    for(int y = 0; y < this->img->nH; y++) {
+        vector<int> cluster;
+        vector<float> distance;
+        for(int x = 0; x < this->img->nW; x++) {
+            cluster.push_back(0);
+            distance.push_back(FLT_MAX);
+        }
+        clusters.push_back(cluster);
+        distances.push_back(distance);
     }
 
-    /** TODO : Boucle : étape 1.
+    /**
      * Pour chaque centre, on calcule la distance des pixels se trouvant dans un rayon de 2S au centre.
      * Si la distance est plus petite que celle en mémoire pour le pixel, elle est modifiée en mémoire
      * et le pixel fait maintenant partie du superpixel.
      */
     for(int i = 0; i < centers.size(); i++) {
+        /* Only compare to pixels in a 2 x step by 2 x step region. */
+        for (int Cx = centers[i][X] - S; Cx < centers[i][X] + S; Cx++) {
+            for (int Cy = centers[i][Y] - S; Cy < centers[i][Y] + S; Cy++) {
+                /* Si les centres des pixels sont bien dans l'image */
+                if(Cx >= 0 && Cx < img->nW && Cy >= 0 && Cy < img->nH) {
+                    // Pixel à comparer
+                    OCTET pR = img->ImgData[Cy * img->nW + Cx];
+                    OCTET pG = img->ImgData[Cy * img->nW + Cx + 1];
+                    OCTET pB = img->ImgData[Cy * img->nW + Cx + 2];
 
-        
+                    // Calcul de la distance
+                    double dRGB = sqrt(pow(centers[i][R] - pR, 2) + pow(centers[i][G] - pG, 2) + pow(centers[i][B] - pB, 2));
+                    double dXY = sqrt(pow(centers[i][X] - Cx, 2) + pow(centers[i][Y] - Cy, 2));
+                    double dist = dRGB + m/S * dXY;
+
+                    // Association du pixel au superpixel si distance inférieure au précédent superpixel
+                    if(dist < distances[Cx][Cy]) {
+                        distances[Cx][Cy] = dist;
+                        clusters[Cx][Cy] = i;
+                    }
+                }
+            }
+        }
     }
 
     /** TODO : Boucle : étape 2.
@@ -54,19 +87,19 @@ Image *SuperPixels::GetImage() {
  * spatiales et la couleur du pixel dans l'espace RGB.
  */
 void SuperPixels::InitCenters() {
-    for(int i = S; i < img->nH - S/2; i+=S) {
-        for(int j = S; j < img->nW - S/2; j+=S) {
+    for(int y = S; y < img->nH - S/2; y+=S) {
+        for(int x = S; x < img->nW - S/2; x+=S) {
             vector<double> center;
 
-            OCTET R = img->ImgData[i * img->nW + j];
-            OCTET G = img->ImgData[i * img->nW + j + 1];
-            OCTET B = img->ImgData[i * img->nW + j + 2];
+            OCTET pR = img->ImgData[y * img->nW + x];
+            OCTET pG = img->ImgData[y * img->nW + x + 1];
+            OCTET pB = img->ImgData[y * img->nW + x + 2];
 
-            center.push_back(R);
-            center.push_back(G);
-            center.push_back(B);
-            center.push_back(i);
-            center.push_back(j);
+            center.push_back(pR);
+            center.push_back(pG);
+            center.push_back(pB);
+            center.push_back(x);
+            center.push_back(y);
 
             centers.push_back(center);
         }

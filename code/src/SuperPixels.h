@@ -17,17 +17,18 @@ class SuperPixels {
 private:
     int N;
     int K;
+    int m;
     double S;
     Image *img;
 
-    vector< std::vector<double> > centers;
-    vector<int> clusters;
-    vector<float> distances;
+    vector< vector<double> > centers;
+    vector<vector<int>> clusters;
+    vector<vector<float>> distances;
 
     void InitCenters();
 
 public:
-    SuperPixels(Image* input, int nbPixels, int nbSuperPixels, double Step);
+    SuperPixels(Image* input, int nbPixels, int nbSuperPixels, double Step, int weight);
     Image* GetImage();
 };
 
