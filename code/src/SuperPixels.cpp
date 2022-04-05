@@ -2,6 +2,7 @@
 // Created by pierrhum on 05/04/2022.
 //
 
+#include <cstdlib>
 #include "SuperPixels.h"
 
 SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double Step) {
@@ -17,15 +18,28 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
      * spatiales et la couleur du pixel dans l'espace LAB.
      */
 
+
     /** TODO : Initialisation de la carte des superpixels et de la carte des distances.
      * Les distances sont initialisées à l'infini et les pixels sont attribués au superpixel 0.
      */
+    int* clusters = (int*)malloc(this->img->nTaille * sizeof(int));
+    float* distances = (float*)malloc(this->img->nTaille * sizeof(float));
+
+    for(int i = 0; i < this->img->nTaille; i++) {
+
+        clusters[i] = 0;
+        distances[i] = FLT_MAX;
+    }
 
     /** TODO : Boucle : étape 1.
      * Pour chaque centre, on calcule la distance des pixels se trouvant dans un rayon de 2S au centre.
      * Si la distance est plus petite que celle en mémoire pour le pixel, elle est modifiée en mémoire
      * et le pixel fait maintenant partie du superpixel.
      */
+    for(int i = 0; i < center.size(); i++) {
+
+        
+    }
 
     /** TODO : Boucle : étape 2.
       * Les positions des centres (5 dimensions) des superpixels sont mises à jour selon la valeur moyenne de tous les pixels du superpixel.
@@ -36,6 +50,8 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
       * deux itérations soit plus petit qu'un certain seuil.
       */
 
+    free(clusters)
+    free(distances);
 }
 
 Image *SuperPixels::GetImage() {
