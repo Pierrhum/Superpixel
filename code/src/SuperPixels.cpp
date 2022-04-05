@@ -19,6 +19,8 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
     /** TODO : Initialisation de la carte des superpixels et de la carte des distances.
      * Les distances sont initialisées à l'infini et les pixels sont attribués au superpixel 0.
      */
+    std::vector<int> clusters;
+    std::vector<float> distances;
 
     for(int i = 0; i < this->img->nTaille; i++) {
 

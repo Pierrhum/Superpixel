@@ -19,7 +19,7 @@ private:
     int K;
     double S;
     Image *img;
-
+    std::vector< std::vector<int> > centers;
 
     void InitCenters();
 
