@@ -1,4 +1,4 @@
-#include "Image.hpp"
+#include "Image.h"
 
 int main(int argc, char* argv[])
 {

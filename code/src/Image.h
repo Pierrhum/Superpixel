@@ -2,13 +2,18 @@
 // Created by pierrhum on 02/03/2022.
 //
 
-#ifndef SUPERPIXELS_IMAGE_HPP
-#define SUPERPIXELS_IMAGE_HPP
+#ifndef SUPERPIXELS_IMAGE_H
+#define SUPERPIXELS_IMAGE_H
 
+#include <stdlib.h>
 #include <stdio.h>
-#include "image_ppm.h"
+#include <string.h>
+#include <math.h>
+#include "Image_ppm.h"
 
-class Image {
+typedef unsigned char OCTET;
+
+class Image : public Image_ppm {
 private:
     OCTET *ImgData;
     int nH = 0;
@@ -24,4 +29,4 @@ public:
 };
 
 
-#endif //SUPERPIXELS_IMAGE_HPP
+#endif //SUPERPIXELS_IMAGE_H

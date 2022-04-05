@@ -1,6 +1,6 @@
-OBJS	= Image.o main.o
-SOURCE	= Image.cpp main.cpp
-HEADER	= image_ppm.h Image.hpp
+OBJS	= Image_ppm.o Image.o main.o
+SOURCE	= Image_ppm.cpp Image.cpp main.cpp
+HEADER	= Image_ppm.h Image.hpp
 OUT	= prog
 CC	 = g++
 FLAGS	 = -g -c -Wall
