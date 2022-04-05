@@ -15,6 +15,6 @@ int main(int argc, char* argv[])
    sscanf (argv[2],"%d",&K);
 
    Image *input = new Image(cNomImgLue);
-   Image *output = input->ToSuperPixels(K);
+   Image *output = input->ToSuperPixelsBySLIC(K);
    output->WriteFile(cNomImgEcrite);
 }

@@ -24,7 +24,7 @@ private:
 public:
     Image() {};
     Image(char* fileName);
-    Image* ToSuperPixels(int K);
+    Image* ToSuperPixelsBySLIC(int K);
     void WriteFile(char* fileName);
 };
 
