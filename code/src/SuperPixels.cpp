@@ -11,12 +11,10 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
     this->K = nbSuperPixels;
     this->S = Step;
 
-    /// ALGO
-
-    /** TODO : Initialisation des centres des superpixels.
-     * Les centres sont équidistants (distance S) et sont en 5 dimensions (x,y,L,a,b) pour leurs coordonnées
-     * spatiales et la couleur du pixel dans l'espace LAB.
-     */
+    /** ALGO SLIC **/
+    
+    /// Initialisation des centres des superpixels.
+    InitCenters();
 
 
     /** TODO : Initialisation de la carte des superpixels et de la carte des distances.
@@ -56,4 +54,28 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
 
 Image *SuperPixels::GetImage() {
     return img;
+}
+
+/** Initialisation des centres des superpixels.
+ * Les centres sont équidistants (distance S) et sont en 5 dimensions (R,G,B,x,y) pour leurs coordonnées
+ * spatiales et la couleur du pixel dans l'espace RGB.
+ */
+void SuperPixels::InitCenters() {
+    for(int i = S; i < img->nH - S/2; i+=S) {
+        for(int j = S; j < img->nW - S/2; j+=S) {
+            vector<double> center;
+
+            OCTET R = img->ImgData[i * img->nW + j];
+            OCTET G = img->ImgData[i * img->nW + j + 1];
+            OCTET B = img->ImgData[i * img->nW + j + 2];
+
+            center.push_back(R);
+            center.push_back(G);
+            center.push_back(B);
+            center.push_back(i);
+            center.push_back(j);
+
+            centers.push_back(center);
+        }
+    }
 }
