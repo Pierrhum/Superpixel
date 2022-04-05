@@ -7,6 +7,9 @@
 
 
 #include "Image.h"
+#include <vector>
+
+using namespace std;
 
 class SuperPixels {
 private:
@@ -14,6 +17,10 @@ private:
     int K;
     double S;
     Image *img;
+
+    vector<vector<double>> centers;
+
+    void InitCenters();
 
 public:
     SuperPixels(Image* input, int nbPixels, int nbSuperPixels, double Step);

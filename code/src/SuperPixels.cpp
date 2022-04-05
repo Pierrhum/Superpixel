@@ -12,11 +12,6 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
 
     /// ALGO
 
-    /** TODO : Initialisation des centres des superpixels.
-     * Les centres sont équidistants (distance S) et sont en 5 dimensions (x,y,L,a,b) pour leurs coordonnées
-     * spatiales et la couleur du pixel dans l'espace LAB.
-     */
-
     /** TODO : Initialisation de la carte des superpixels et de la carte des distances.
      * Les distances sont initialisées à l'infini et les pixels sont attribués au superpixel 0.
      */
@@ -40,4 +35,12 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
 
 Image *SuperPixels::GetImage() {
     return img;
+}
+
+/** TODO : Initialisation des centres des superpixels.
+ * Les centres sont équidistants (distance S) et sont en 5 dimensions (x,y,L,a,b) pour leurs coordonnées
+ * spatiales et la couleur du pixel dans l'espace LAB.
+ */
+void SuperPixels::InitCenters() {
+    //for(double i = S; i < img-> )
 }

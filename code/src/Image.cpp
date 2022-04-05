@@ -20,7 +20,7 @@ Image* Image::ToSuperPixelsBySLIC(int K) {
     img->nTaille3 = nTaille3;
 
     // Création de l'image en Superpixels
-    SuperPixels output = SuperPixels(img, nH * nW, K, (nH*nW)/K);
+    SuperPixels output = SuperPixels(img, nH * nW, K, sqrt((nH*nW)/K));
 
     // Retourne l'image
     return output.GetImage();
