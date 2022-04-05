@@ -10,13 +10,17 @@
 
 class Image {
 private:
-    OCTET *OriginalData;
     OCTET *ImgData;
+    int nH = 0;
+    int nW = 0; 
+    int nTaille = 0;
+    int nTaille3 = 0;
 
 public:
-    Image(const char* fileName);
-    void ToSuperPixels(int K);
-    void WriteFile(const char* fileName);
+    Image() {};
+    Image(char* fileName);
+    Image* ToSuperPixels(int K);
+    void WriteFile(char* fileName);
 };
 
 

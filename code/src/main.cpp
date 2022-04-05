@@ -2,7 +2,7 @@
 
 int main(int argc, char* argv[])
 {
-  char cNomImgLue[250], cNomImgEcrite[250] = "output.ppm";
+  char cNomImgLue[250], cNomImgEcrite[250] = "../output.ppm";
   int K;
   
   if (argc != 3) 
@@ -12,9 +12,9 @@ int main(int argc, char* argv[])
      }
    
    sscanf (argv[1],"%s",cNomImgLue) ;
-   sscanf (argv[3],"%d",&K);
+   sscanf (argv[2],"%d",&K);
 
-   Image *output = new Image(cNomImgLue);
-   output->ToSuperPixels(K);
+   Image *input = new Image(cNomImgLue);
+   Image *output = input->ToSuperPixels(K);
    output->WriteFile(cNomImgEcrite);
 }
