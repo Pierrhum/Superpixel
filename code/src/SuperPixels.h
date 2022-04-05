@@ -7,6 +7,8 @@
 
 
 #include "Image.h"
+#include <cstdlib>
+#include <cfloat>
 #include <vector>
 
 using namespace std;
@@ -18,7 +20,6 @@ private:
     double S;
     Image *img;
 
-    vector< vector<double> > centers;
 
     void InitCenters();
 

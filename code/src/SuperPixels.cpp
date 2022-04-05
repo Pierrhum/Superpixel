@@ -2,7 +2,6 @@
 // Created by pierrhum on 05/04/2022.
 //
 
-#include <cfloat>
 #include "SuperPixels.h"
 
 SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double Step) {
@@ -20,8 +19,6 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
     /** TODO : Initialisation de la carte des superpixels et de la carte des distances.
      * Les distances sont initialisées à l'infini et les pixels sont attribués au superpixel 0.
      */
-    std::vector<int> clusters;
-    std::vector<float> distances;
 
     for(int i = 0; i < this->img->nTaille; i++) {
 
@@ -47,7 +44,6 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
       * Les étapes 2 et 3 sont re-effectuées jusqu'à ce que l'algorithme converge, c'est-à-dire, que le déplacement moyen des centres entre
       * deux itérations soit plus petit qu'un certain seuil.
       */
-
 }
 
 Image *SuperPixels::GetImage() {
