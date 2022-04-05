@@ -19,7 +19,10 @@ private:
     int K;
     double S;
     Image *img;
-    std::vector< std::vector<int> > centers;
+
+    vector< std::vector<double> > centers;
+    vector<int> clusters;
+    vector<float> distances;
 
     void InitCenters();
 
