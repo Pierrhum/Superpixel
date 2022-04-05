@@ -1,3 +1,7 @@
 
 *.o
 code/src/prog
+.DS_Store
+code/.DS_Store
+code/src/slic.cpp
+code/src/slic.h
