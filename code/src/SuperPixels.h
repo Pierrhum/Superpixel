@@ -7,6 +7,8 @@
 
 
 #include "Image.h"
+#include <cstdlib>
+#include <cfloat>
 #include <vector>
 
 using namespace std;
@@ -19,6 +21,8 @@ private:
     Image *img;
 
     vector<vector<double>> centers;
+    vector<int> clusters;
+    vector<float> distances;
 
     void InitCenters();
 
