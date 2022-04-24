@@ -21,27 +21,15 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
 
     /** ALGO SLIC **/
     
-    /// Initialisation des centres des superpixels.
-    cout << "Initialisation des centers" << endl;
+    /// 1 - Initialisation des centres des superpixels.
+    cout << "Initialisation des centres des superpixels." << endl;
     InitCenters();
     cout << centers.size() << " centres créés." << endl;
 
 
-    /** TODO : Initialisation de la carte des superpixels et de la carte des distances.
-     * Les distances sont initialisées à l'infini et les pixels sont attribués au superpixel 0.
-     */
+    /// 2 - Initialisation de la carte des superpixels et de la carte des distances.
     cout << "Initialisation de la carte des superpixels et de la carte des distances" << endl;
-    for(int x = 0; x < this->img->nW; x++) {
-        vector<int> cluster;
-        vector<float> distance;
-        for(int y = 0; y < this->img->nH; y++) {
-            // x : 1279 y : 853
-            cluster.push_back(0);
-            distance.push_back(FLT_MAX);
-        }
-        clusters.push_back(cluster);
-        distances.push_back(distance);
-    }
+    InitClusters();
     cout << clusters.size() << " cartes créés." << endl;
 
     /**
@@ -121,13 +109,14 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
             centers[i]->x /= spix_cpt[i];
             centers[i]->y /= spix_cpt[i];
         }
-        cout << "done" << endl;
-
     /** TODO : Fin boucle
       * Les étapes 2 et 3 sont re-effectuées jusqu'à ce que l'algorithme converge, c'est-à-dire, que le déplacement moyen des centres entre
       * deux itérations soit plus petit qu'un certain seuil.
       */
     }
+
+    cout << "Connectivity" << endl;
+    Connectivity();
 
     cout << "Ecriture de l'image" << endl;
     for(int x = 0; x < img->nW; x++) {
@@ -139,8 +128,7 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
         }
     }
 
-    // DrawContour();
-
+    
 }
 
 vector<Pixel*> SuperPixels::GetPixels()
@@ -160,6 +148,57 @@ Image *SuperPixels::GetImage() {
     return img;
 }
 
+/**
+ * Les pixels ayant tous des voisins valides sont les premiers à être modifiés et être inclus au superpixel de leurs voisins. 
+ * Ensuite, itérativement, les pixels avec le plus de voisins valides sont modifiés jusqu'à ce que tous les pixels aient été traités. 
+ * Dans le cas où un pixel aurait plusieurs superpixels différents comme voisins, le superpixel le plus fréquent prend le pixel.
+ */
+
+void SuperPixels::Connectivity() {
+    const int dx[8] = {-1, -1,  0,  1, 1, 1, 0, -1};
+	const int dy[8] = { 0, -1, -1, -1, 0, 1, 1,  1};
+
+    for(int b=0; b < 5; b++) {
+        for(int i = 0; i < img->nW; i++) {
+                for(int j = 0; j < img->nH; j++) {
+                    int cpt = 0;
+                    // Cluster, cpt
+                    map<int, int> newClusters;
+                    /* Compare the pixel to its neighbours. */
+                    for (int k = 0; k < 8; k++) {
+                        int x = i + dx[k];
+                        int y = j + dy[k];
+                        if (x >= 0 && x < img->nW && y >= 0 && y < img->nH) {
+                            if(clusters[i][j] != clusters[x][y]) {
+                                auto c = newClusters.find(clusters[x][y]);
+                                if(c != newClusters.end()) {
+                                    newClusters[clusters[x][y]] += 1 ;
+
+                                }
+                                else
+                                    newClusters.insert(pair<int,int>(clusters[x][y], 1));
+                                cpt++;
+                            }
+                        }
+                    }
+                    if(cpt > 4) {
+                        int frequency=0;
+                        int newCluster;
+                        for(auto item : newClusters) {
+                            if(item.second > frequency) {
+                                frequency = item.second;
+                                newCluster = item.first;
+                            }
+                        }
+                        // New cluster
+                        clusters[i][j] = newCluster;
+                    }
+                }
+            }
+    }
+    
+}
+
 /** Initialisation des centres des superpixels.
  * Les centres sont équidistants (distance S) et sont en 5 dimensions (R,G,B,x,y) pour leurs coordonnées
  * spatiales et la couleur du pixel dans l'espace RGB.
@@ -170,11 +209,12 @@ void SuperPixels::InitCenters() {
     cout << img->nW / 2 << endl;
     cout << S << endl;
 
-    for(int x = S/2; x <= img->nW - S/2; x+=S) {
-        for(int y = S/2; y <= img->nH - S/2; y+=S) {
-            vector<double> center;
+    for(int x = S; x <= img->nW - S/2; x+=S) {
+        for(int y = S; y <= img->nH - S/2; y+=S) {
 
-            Pixel* p = pixels[y * img->nW + x];
+            vector<int> centerPos = AdaptCenter(x,y);
+
+            Pixel* p = pixels[centerPos[1] * img->nW + centerPos[0]];
 
             // Pixel à comparer
 
@@ -182,11 +222,57 @@ void SuperPixels::InitCenters() {
             c->pR = p->pR;
             c->pG = p->pG;
             c->pB = p->pB;
-            c->x = x;
-            c->y = y;
+            c->x = centerPos[0];
+            c->y = centerPos[1];
 
             centers.push_back(c);
         }
+    }
+}
+/**
+ * Les positions initiales des centres sont légèrement déplacées en x,y de ±1 pixel afin qu'ils tombent sur un emplacement x,y 
+ * avec un petit gradient pour éviter d'avoir un centre sur une arête.
+ */
+vector<int> SuperPixels::AdaptCenter(int x, int y) {
+    float min_grad = FLT_MAX;
+    vector<int> centerPos;
+    centerPos.resize(2,0);
+
+    for(int i=(x-1); i < x+2; i++) {
+        for(int j=(y-1); j < y+2; j++) {
+            Pixel* p1 = pixels[(j+1) * img->nW + i];
+            Pixel* p2 = pixels[j * img->nW + i+1];
+            Pixel* p3 = pixels[j * img->nW + i];
+            double i1 = p1->pR * 0.11 + p1->pG * 0.59 + p1->pB * 0.3;
+            double i2 = p2->pR * 0.11 + p2->pG * 0.59 + p2->pB * 0.3;
+            double i3 = p3->pR * 0.11 + p3->pG * 0.59 + p3->pB * 0.3;
+            if(sqrt(pow(i1 - i3, 2)) + sqrt(pow(i2 - i3,2)) < min_grad) {
+                min_grad = fabs(i1 - i3) + fabs(i2 - i3);
+                centerPos[0] = i;
+                centerPos[1] = j;
+            }
+        }
+    }
+
+    return centerPos;
+
+}
+
+
+/** Initialisation de la carte des superpixels et de la carte des distances. 
+ * Les distances sont initialisées à l'infini et les pixels sont attribués au superpixel 0.
+ */
+void SuperPixels::InitClusters() {
+    for(int x = 0; x < this->img->nW; x++) {
+        vector<int> cluster;
+        vector<float> distance;
+        for(int y = 0; y < this->img->nH; y++) {
+            // x : 1279 y : 853
+            cluster.push_back(0);
+            distance.push_back(FLT_MAX);
+        }
+        clusters.push_back(cluster);
+        distances.push_back(distance);
     }
 }
 

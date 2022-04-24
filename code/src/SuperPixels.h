@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <cfloat>
 #include <vector>
+#include <map>
 
 using namespace std;
 
@@ -41,7 +42,10 @@ private:
     vector<vector<float>> distances;
 
     void InitCenters();
+    vector<int> AdaptCenter(int x, int y);
+    void InitClusters();
     void DebugCenter();
+    void Connectivity();
     double GetDistance(Center* Ck, int Xi, int Yi);
     vector<Pixel*> GetPixels();
 
