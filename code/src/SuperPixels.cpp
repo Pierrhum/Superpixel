@@ -59,10 +59,12 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
         cout << "Calcul des distances" << endl;
         for(int i = 0; i < centers.size(); i++) {
             /* Only compare to pixels in a 2 x step by 2 x step region. */
-            for (int Cx = centers[i].x - S; Cx < centers[i].x + S; Cx++) {
-                for (int Cy = centers[i].y - S; Cy < centers[i].y + S; Cy++) {
+            for (int Cy = centers[i].y - S; Cy < centers[i].y + S; Cy++) {
+                for (int Cx = centers[i].x - S; Cx < centers[i].x + S; Cx++) {
                     /* Si les centres des pixels sont bien dans l'image */
                     if(Cx >= 0 && Cx < img->nH && Cy >= 0 && Cy < img->nW) {
+                        if(Cx > 850)
+                            cout << "x : " << Cx << "   - y : " << Cy << endl;
                         // Pixel à comparer
                         double dist = GetDistance(centers[i], Cx, Cy);
 
@@ -94,8 +96,8 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
         }
         
         cout << "Calcul des sommes pour la moyenne" << endl;
-        for(int x = 0; x < img->nW; x++) {
-            for(int y = 0; y < img->nH; y++) {
+        for(int y = 0; y < img->nH; y++) {
+            for(int x = 0; x < img->nW; x++) {
                 // Center : centre super pixel
                 int spix = clusters[x][y]; // Retourne super pixel associé au pixel x y
 
@@ -129,8 +131,8 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
     }
 
     cout << "Ecriture de l'image" << endl;
-    for(int x = 0; x < img->nW; x++) {
-        for(int y = 0; y < img->nH; y++) {
+    for(int y = 0; y < img->nH; y++) {
+        for(int x = 0; x < img->nW; x++) {
             Center c = centers[clusters[x][y]];
             img->ImgData[y*3 * img->nW + (x*3)] = c.pR;
             img->ImgData[y*3 * img->nW + (x*3 + 1)] = c.pG;
@@ -169,8 +171,8 @@ void SuperPixels::InitCenters() {
     cout << img->nW / 2 << endl;
     cout << S << endl;
 
-    for(int x = S/2; x <= img->nW - S/2; x+=S) {
-        for(int y = S/2; y <= img->nH - S/2; y+=S) {
+    for(int y = S/2; y <= img->nH - S/2; y+=S) {
+        for(int x = S/2; x <= img->nW - S/2; x+=S) {
             vector<double> center;
 
             Pixel p = pixels[y * img->nW + x];
@@ -211,8 +213,8 @@ void SuperPixels::DrawContour() {
     vector<vector<bool>> draw;
     draw.resize(img->nW, line);
 
-    for(int i = 0; i < img->nW; i++) {
-        for(int j = 0; j < img->nH; j++) {
+    for(int j = 0; j < img->nH; j++) {
+        for(int i = 0; i < img->nW; i++) {
             /* Compare the pixel to its 8 neighbours. */
             for (int k = 0; k < 8; k++) {
                 int x = i + dx[k];
@@ -234,8 +236,8 @@ void SuperPixels::DebugCenter() {
     const int dx[8] = {-1, -1,  0,  1, 1, 1, 0, -1};
 	const int dy[8] = { 0, -1, -1, -1, 0, 1, 1,  1};
 
-    for(int x = 0; x < img->nW; x++) {
-        for(int y = 0; y < img->nH; y++) {
+    for(int y = 0; y < img->nH; y++) {
+        for(int x = 0; x < img->nW; x++) {
             img->ImgData[y*3 * img->nW + (x*3)] = 0;
             img->ImgData[y*3 * img->nW + (x*3 + 1)] = 0;
             img->ImgData[y*3 * img->nW + (x*3 + 2)] = 0;
