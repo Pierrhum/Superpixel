@@ -5,3 +5,4 @@ code/src/prog
 code/.DS_Store
 code/src/slic.cpp
 code/src/slic.h
+code/output.ppm

@@ -49,7 +49,7 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
      * Si la distance est plus petite que celle en mémoire pour le pixel, elle est modifiée en mémoire
      * et le pixel fait maintenant partie du superpixel.
      */
-    for(int b=0; b < 1; b++) {
+    for(int b=0; b < 10; b++) {
         for (int j = 0; j < img->nW; j++) {
             for (int k = 0;k < img->nH; k++) {
                 distances[j][k] = FLT_MAX;
@@ -137,6 +137,8 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
         }
     }
 
+    DrawContour();
+
 }
 
 vector<Pixel> SuperPixels::GetPixels()
@@ -203,6 +205,11 @@ void SuperPixels::DrawContour() {
     const int dx[8] = {-1, -1,  0,  1, 1, 1, 0, -1};
 	const int dy[8] = { 0, -1, -1, -1, 0, 1, 1,  1};
 
+    vector<bool> line;
+    line.resize(img->nH, false);
+    vector<vector<bool>> draw;
+    draw.resize(img->nW, line);
+
     for(int i = 0; i < img->nW; i++) {
         for(int j = 0; j < img->nH; j++) {
             /* Compare the pixel to its 8 neighbours. */
@@ -210,7 +217,8 @@ void SuperPixels::DrawContour() {
                 int x = i + dx[k];
                 int y = j + dy[k];
                 if (x >= 0 && x < img->nW && y >= 0 && y < img->nH) {
-                    if(clusters[i][j] != clusters[x][y]) {
+                    if(!draw[x][y] && !draw[i][j] && clusters[i][j] != clusters[x][y]) {
+                        draw[x][y] = true;
                         img->ImgData[y*3 * img->nW + (x*3)] = 255;
                         img->ImgData[y*3 * img->nW + (x*3 + 1)] = 0;
                         img->ImgData[y*3 * img->nW + (x*3 + 2)] = 0;
