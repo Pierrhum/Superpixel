@@ -35,15 +35,15 @@ private:
     double S;
     Image *img;
 
-    vector<Pixel> pixels;
-    vector< Center > centers;
+    vector<Pixel*> pixels;
+    vector< Center* > centers;
     vector<vector<int>> clusters;
     vector<vector<float>> distances;
 
     void InitCenters();
     void DebugCenter();
-    double GetDistance(Center Ck, int Xi, int Yi);
-    vector<Pixel> GetPixels();
+    double GetDistance(Center* Ck, int Xi, int Yi);
+    vector<Pixel*> GetPixels();
 
 public:
     SuperPixels(Image* input, int nbPixels, int nbSuperPixels, double Step, int weight);
