@@ -41,6 +41,7 @@ private:
     vector<vector<float>> distances;
 
     void InitCenters();
+    void DebugCenter();
     double GetDistance(Center Ck, int Xi, int Yi);
     vector<Pixel> GetPixels();
 

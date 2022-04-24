@@ -50,6 +50,7 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
      * et le pixel fait maintenant partie du superpixel.
      */
     for(int b=0; b < 10; b++) {
+        cout << "Loop " << b << endl;
         for (int j = 0; j < img->nW; j++) {
             for (int k = 0;k < img->nH; k++) {
                 distances[j][k] = FLT_MAX;
@@ -137,7 +138,7 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
         }
     }
 
-    DrawContour();
+    // DrawContour();
 
 }
 
@@ -164,10 +165,12 @@ Image *SuperPixels::GetImage() {
  */
 void SuperPixels::InitCenters() {
 
-    cout << "S : " << S << endl;
 
-    for(int x = S/2; x < img->nW - S/2; x+=S) {
-        for(int y = S/2; y < img->nH - S/2; y+=S) {
+    cout << img->nW / 2 << endl;
+    cout << S << endl;
+
+    for(int x = S/2; x <= img->nW - S/2; x+=S) {
+        for(int y = S/2; y <= img->nH - S/2; y+=S) {
             vector<double> center;
 
             Pixel p = pixels[y * img->nW + x];
@@ -180,8 +183,6 @@ void SuperPixels::InitCenters() {
             c.pB = p.pB;
             c.x = x;
             c.y = y;
-
-            cout << c.x << " " << c.y << endl;
 
             centers.push_back(c);
         }
@@ -226,5 +227,26 @@ void SuperPixels::DrawContour() {
                 }
             }
         }
+    }
+}
+
+void SuperPixels::DebugCenter() {
+    const int dx[8] = {-1, -1,  0,  1, 1, 1, 0, -1};
+	const int dy[8] = { 0, -1, -1, -1, 0, 1, 1,  1};
+
+    for(int x = 0; x < img->nW; x++) {
+        for(int y = 0; y < img->nH; y++) {
+            img->ImgData[y*3 * img->nW + (x*3)] = 0;
+            img->ImgData[y*3 * img->nW + (x*3 + 1)] = 0;
+            img->ImgData[y*3 * img->nW + (x*3 + 2)] = 0;
+        }
+    }
+    for(Center c : centers) {
+        for (int k = 0; k < 8; k++) {
+            int x = c.x + dx[k];
+            int y = c.y + dy[k];
+            img->ImgData[y*3 * img->nW + (x*3)] = 255;
+        }
+        
     }
 }

@@ -10,7 +10,7 @@ Image::Image(char* fileName) {
     lire_image_ppm(fileName, ImgData, nH * nW);
 }
 
-Image* Image::ToSuperPixelsBySLIC(int K, int m) {
+Image* Image::ToSuperPixelsBySLIC(int K, int m, bool displayContour) {
     // Copie de l'input
     Image* img = new Image();
     img->ImgData = ImgData;
@@ -21,6 +21,8 @@ Image* Image::ToSuperPixelsBySLIC(int K, int m) {
 
     // Création de l'image en Superpixels
     SuperPixels output = SuperPixels(img, img->nTaille, K, sqrt((nTaille)/K), m);
+    if(displayContour)
+        output.DrawContour();
 
     // Retourne l'image
     return output.GetImage();
