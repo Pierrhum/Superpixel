@@ -17,8 +17,7 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
     this->K = nbSuperPixels;
     this->S = Step;
     this->m = weight;
-
-    vector<Pixel> pixels = GetPixels();
+    this->pixels = GetPixels();
 
     /** ALGO SLIC **/
     
@@ -32,12 +31,12 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
      * Les distances sont initialisées à l'infini et les pixels sont attribués au superpixel 0.
      */
     cout << "Initialisation de la carte des superpixels et de la carte des distances" << endl;
-    for(int y = 0; y < this->img->nH * 3; y++) {
+    for(int x = 0; x < this->img->nW; x++) {
         vector<int> cluster;
         vector<float> distance;
-        for(int x = 0; x < this->img->nW; x++) {
+        for(int y = 0; y < this->img->nH; y++) {
             // x : 1279 y : 853
-            cluster.push_back(0);
+            cluster.push_back(-1);
             distance.push_back(FLT_MAX);
         }
         clusters.push_back(cluster);
@@ -50,88 +49,93 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
      * Si la distance est plus petite que celle en mémoire pour le pixel, elle est modifiée en mémoire
      * et le pixel fait maintenant partie du superpixel.
      */
-    cout << "Calcul des distances" << endl;
-    for(int i = 0; i < centers.size(); i++) {
-        /* Only compare to pixels in a 2 x step by 2 x step region. */
-        for (int Cx = centers[i].x - S; Cx < centers[i].x + S; Cx++) {
-            for (int Cy = centers[i].y - S; Cy < centers[i].y + S; Cy++) {
-                /* Si les centres des pixels sont bien dans l'image */
-                if(Cx >= 0 && Cx < img->nH && Cy >= 0 && Cy < img->nW) {
-                    // Pixel à comparer
-                    double dist = GetDistance(centers[i], Cx, Cy);
+    for(int b=0; b < 1; b++) {
+        for (int j = 0; j < img->nW; j++) {
+            for (int k = 0;k < img->nH; k++) {
+                distances[j][k] = FLT_MAX;
+            }
+        }
+        cout << "Calcul des distances" << endl;
+        for(int i = 0; i < centers.size(); i++) {
+            /* Only compare to pixels in a 2 x step by 2 x step region. */
+            for (int Cx = centers[i].x - S; Cx < centers[i].x + S; Cx++) {
+                for (int Cy = centers[i].y - S; Cy < centers[i].y + S; Cy++) {
+                    /* Si les centres des pixels sont bien dans l'image */
+                    if(Cx >= 0 && Cx < img->nH && Cy >= 0 && Cy < img->nW) {
+                        // Pixel à comparer
+                        double dist = GetDistance(centers[i], Cx, Cy);
 
-                    // Association du pixel au superpixel si distance inférieure au précédent superpixel
-                    if(dist < distances[Cx][Cy]) {
-                        distances[Cx][Cy] = dist;
-                        clusters[Cx][Cy] = i;
+                        // Association du pixel au superpixel si distance inférieure au précédent superpixel
+                        if(dist < distances[Cx][Cy]) {
+                            distances[Cx][Cy] = dist;
+                            clusters[Cx][Cy] = i;
+                        }
                     }
                 }
             }
         }
-    }
 
-    /** TODO : Boucle : étape 2.
-      * Les positions des centres (5 dimensions) des superpixels sont mises à jour selon la valeur moyenne de tous les pixels du superpixel.
-      */
+        /** TODO : Boucle : étape 2.
+         * Les positions des centres (5 dimensions) des superpixels sont mises à jour selon la valeur moyenne de tous les pixels du superpixel.
+         */
 
-    vector<int> spix_cpt;
-    spix_cpt.resize(centers.size(), 0);
+        vector<int> spix_cpt;
+        spix_cpt.resize(centers.size(), 0);
 
-    cout << "Réinitialisation des valeurs des centres" << endl;
-    // Réinitialisation des valeurs des centres des superpixels, pour établir les valeurs moyennes
-    for(int i = 0; i < centers.size(); i++) {
-        centers[i].pR = 0;
-        centers[i].pG = 0;
-        centers[i].pB = 0;
-        centers[i].x = 0;
-        centers[i].y = 0;
-    }
-    
-    cout << "Calcul des sommes pour la moyenne" << endl;
-    for(int y = 0; y < img->nH*3; y++) {
-        for(int x = 0; x < img->nW; x++) {
-            // Center : centre super pixel
-            int spix = clusters[y][x]; // Retourne super pixel associé au pixel x y
-
-            // Couleurs du Pixel (x,y)
-            vector<int> pix = GetPixelAt(x,y); 
-
-            // Somme des valeurs du superpixel
-            centers[spix].pR += pix[R];
-            centers[spix].pG += pix[G];
-            centers[spix].pB += pix[B];
-            centers[spix].x += x;
-            centers[spix].y += y;
-            spix_cpt[spix] += 1;
+        cout << "Réinitialisation des valeurs des centres" << endl;
+        // Réinitialisation des valeurs des centres des superpixels, pour établir les valeurs moyennes
+        for(int i = 0; i < centers.size(); i++) {
+            centers[i].pR = 0;
+            centers[i].pG = 0;
+            centers[i].pB = 0;
+            centers[i].x = 0;
+            centers[i].y = 0;
         }
-    }
+        
+        cout << "Calcul des sommes pour la moyenne" << endl;
+        for(int x = 0; x < img->nW; x++) {
+            for(int y = 0; y < img->nH; y++) {
+                // Center : centre super pixel
+                int spix = clusters[x][y]; // Retourne super pixel associé au pixel x y
 
-    cout << "Normalisation de la moyenne" << endl;
-    for(int i = 0; i < centers.size(); i++) {
-        spix_cpt[i] = spix_cpt[i]==0 ? 1 : spix_cpt[i];
-        centers[i].pR /= spix_cpt[i];
-        centers[i].pG /= spix_cpt[i];
-        centers[i].pB /= spix_cpt[i];
-        centers[i].x /= spix_cpt[i];
-        centers[i].y /= spix_cpt[i];
-    }
+                // Couleurs du Pixel (x,y)
+                Pixel pix = pixels[y * img->nW + x];
+
+                // Somme des valeurs du superpixel
+                centers[spix].pR += pix.pR;
+                centers[spix].pG += pix.pG;
+                centers[spix].pB += pix.pB;
+                centers[spix].x += x;
+                centers[spix].y += y;
+                spix_cpt[spix] += 1;
+            }
+        }
+
+        cout << "Normalisation de la moyenne" << endl;
+        for(int i = 0; i < centers.size(); i++) {
+            spix_cpt[i] = spix_cpt[i]==0 ? 1 : spix_cpt[i];
+            centers[i].pR /= spix_cpt[i];
+            centers[i].pG /= spix_cpt[i];
+            centers[i].pB /= spix_cpt[i];
+            centers[i].x /= spix_cpt[i];
+            centers[i].y /= spix_cpt[i];
+        }
 
     /** TODO : Fin boucle
       * Les étapes 2 et 3 sont re-effectuées jusqu'à ce que l'algorithme converge, c'est-à-dire, que le déplacement moyen des centres entre
       * deux itérations soit plus petit qu'un certain seuil.
       */
-
-    cout << "Ecriture de l'image" << endl;
-    for(int y = 0; y < img->nH * 3; y++) {
-        for(int x = 0; x < img->nW; x++) {
-            Center c = centers[clusters[y][x]];
-            //cout << "x : " << x << " - y : " << y << " - SuuuupaPixel : " << clusters[y][x] << endl;
-            img->ImgData[y * img->nW + x] = c.pR;
-            img->ImgData[y * img->nW + x + 1] = c.pG;
-            img->ImgData[y * img->nW + x + 2] = c.pB;
-        }
     }
 
+    cout << "Ecriture de l'image" << endl;
+    for(int x = 0; x < img->nW; x++) {
+        for(int y = 0; y < img->nH; y++) {
+            Center c = centers[clusters[x][y]];
+            img->ImgData[y*3 * img->nW + (x*3)] = c.pR;
+            img->ImgData[y*3 * img->nW + (x*3 + 1)] = c.pG;
+            img->ImgData[y*3 * img->nW + (x*3 + 2)] = c.pB;
+        }
+    }
 
 }
 
@@ -160,17 +164,18 @@ void SuperPixels::InitCenters() {
 
     cout << "S : " << S << endl;
 
-    for(int y = S/2; y < img->nH - S/2; y+=S) {
-        for(int x = S/2; x < img->nW - S/2; x+=S) {
+    for(int x = S/2; x < img->nW - S/2; x+=S) {
+        for(int y = S/2; y < img->nH - S/2; y+=S) {
             vector<double> center;
 
+            Pixel p = pixels[y * img->nW + x];
+
             // Pixel à comparer
-            vector<int> pix = GetPixelAt(x,y); 
 
             Center c;
-            c.pR = pix[R];
-            c.pG = pix[G];
-            c.pB = pix[B];
+            c.pR = p.pR;
+            c.pG = p.pG;
+            c.pB = p.pB;
             c.x = x;
             c.y = y;
 
@@ -184,22 +189,34 @@ void SuperPixels::InitCenters() {
 double SuperPixels::GetDistance(Center Ck, int Xi, int Yi) {
     
     // Pixel à comparer
-    vector<int> pix = GetPixelAt(Xi,Yi); 
+    Pixel pix = pixels[Yi * img->nH + Xi]; 
 
     // Calcul de la distance
-    double dRGB = sqrt(pow(Ck.pR - pix[R], 2) + pow(Ck.pG - pix[G], 2) + pow(Ck.pB - pix[B], 2));
+    double dRGB = sqrt(pow(Ck.pR - pix.pR, 2) + pow(Ck.pG - pix.pG, 2) + pow(Ck.pB - pix.pB, 2));
     double dXY = sqrt(pow(Ck.x - Xi, 2) + pow(Ck.y - Yi, 2));
     double dist = dRGB + m/S * dXY;
 
     return dist;
 }
 
-vector<int> SuperPixels::GetPixelAt(int x, int y) {
-    vector<int> rgb;
+void SuperPixels::DrawContour() {
+    const int dx[8] = {-1, -1,  0,  1, 1, 1, 0, -1};
+	const int dy[8] = { 0, -1, -1, -1, 0, 1, 1,  1};
 
-    rgb.push_back(img->ImgData[y*img->nW+x]);
-    rgb.push_back(img->ImgData[y*img->nW+(x+1)]);
-    rgb.push_back(img->ImgData[y*img->nW+(x+2)]);
-
-    return rgb;
+    for(int i = 0; i < img->nW; i++) {
+        for(int j = 0; j < img->nH; j++) {
+            /* Compare the pixel to its 8 neighbours. */
+            for (int k = 0; k < 8; k++) {
+                int x = i + dx[k];
+                int y = j + dy[k];
+                if (x >= 0 && x < img->nW && y >= 0 && y < img->nH) {
+                    if(clusters[i][j] != clusters[x][y]) {
+                        img->ImgData[y*3 * img->nW + (x*3)] = 255;
+                        img->ImgData[y*3 * img->nW + (x*3 + 1)] = 0;
+                        img->ImgData[y*3 * img->nW + (x*3 + 2)] = 0;
+                    }
+                }
+            }
+        }
+    }
 }

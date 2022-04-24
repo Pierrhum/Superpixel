@@ -35,6 +35,7 @@ private:
     double S;
     Image *img;
 
+    vector<Pixel> pixels;
     vector< Center > centers;
     vector<vector<int>> clusters;
     vector<vector<float>> distances;
@@ -42,10 +43,10 @@ private:
     void InitCenters();
     double GetDistance(Center Ck, int Xi, int Yi);
     vector<Pixel> GetPixels();
-    vector<int> GetPixelAt(int x, int y);
 
 public:
     SuperPixels(Image* input, int nbPixels, int nbSuperPixels, double Step, int weight);
+    void DrawContour();
     Image* GetImage();
 };
 
