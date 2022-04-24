@@ -7,13 +7,13 @@ int main(int argc, char* argv[])
   
   if (argc != 4)
      {
-       printf("Usage: ImageIn.ppm Regions \n"); 
+       printf("Usage: img[ImageIn] K[Regions] m[Weight] \n"); 
        exit (1) ;
      }
    
    sscanf (argv[1],"%s",cNomImgLue) ;
    sscanf (argv[2],"%d",&K);
-    sscanf (argv[3],"%d",&m);
+   sscanf (argv[3],"%d",&m);
 
    Image *input = new Image(cNomImgLue);
    Image *output = input->ToSuperPixelsBySLIC(K, m);
