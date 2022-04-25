@@ -30,19 +30,19 @@ void Image::WriteFile(char* fileName) {
    ecrire_image_ppm(fileName, ImgData,  nH, nW);
 }
 
-void Image::rle_encode(const OCTET* data, const uint data_length, std::vector<uint>& encoded_data) {
+void Image::rle_encode(const OCTET* data, const unsigned int data_length, std::vector<unsigned int>& encoded_data) {
 
-    uint i = 0;
+    unsigned int i = 0;
 
     while(i < data_length) {
 
-        uint count = 1;
+        unsigned int count = 1;
         
         OCTET red_value = data[i];
         OCTET green_value = data[i+1];
         OCTET blue_value = data[i+2];
         
-        uint j = i;
+        unsigned int j = i;
 
         while(j < data_length) {
 
@@ -64,29 +64,29 @@ void Image::rle_encode(const OCTET* data, const uint data_length, std::vector<ui
     }
 }
 
-void Image::rle_decode(const std::vector<uint>& encoded_data, OCTET** decoded_data, uint& decoded_data_length) {
+void Image::rle_decode(const std::vector<unsigned int>& encoded_data, OCTET** decoded_data, unsigned int& decoded_data_length) {
 
-    uint encoded_data_length = encoded_data.size();
+    unsigned int encoded_data_length = encoded_data.size();
 
     decoded_data_length = 0;
 
-    for(uint i = 0; i < encoded_data_length; i += 4) decoded_data_length += encoded_data[i];
+    for(unsigned int i = 0; i < encoded_data_length; i += 4) decoded_data_length += encoded_data[i];
 
     decoded_data_length *= 3;
 
     allocation_tableau(*decoded_data,OCTET,decoded_data_length);
 
-    uint k = 0;
+    unsigned int k = 0;
 
-    for(uint i = 0; i < encoded_data_length; i += 4) {
+    for(unsigned int i = 0; i < encoded_data_length; i += 4) {
 
-        uint run_count = encoded_data[i];
+        unsigned int run_count = encoded_data[i];
 
         OCTET run_red_value = encoded_data[i+1];
         OCTET run_green_value = encoded_data[i+2];
         OCTET run_blue_value = encoded_data[i+3];
 
-        for(uint j = 0; j < run_count; j++) {
+        for(unsigned int j = 0; j < run_count; j++) {
 
             decoded_data[0][k] = run_red_value;
             decoded_data[0][k+1] = run_green_value;
