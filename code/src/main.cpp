@@ -1,4 +1,6 @@
 #include "Image.h"
+#include <iostream>
+#include <vector>
 
 int main(int argc, char* argv[])
 {
@@ -18,6 +20,20 @@ int main(int argc, char* argv[])
 
    Image *input = new Image(cNomImgLue);
    Image *output = input->ToSuperPixelsBySLIC(K, m, displayContour);
-   output->WriteFile(cNomImgEcrite);
-   free(output->ImgData);
+   
+    std::vector<uint> encoded_output;
+
+    output->rle_encode(output->ImgData,output->nTaille3,encoded_output);
+
+    OCTET* decoded_output;
+    uint decoded_output_length;
+
+    output->rle_decode(encoded_output,&decoded_output,decoded_output_length);
+
+    std::cout << output->nTaille3 << " > " << encoded_output.size() << " > " << decoded_output_length << std::endl;
+
+    output->WriteFile(cNomImgEcrite);
+    
+    free(output->ImgData);
+    free(decoded_output);
 }
