@@ -11,7 +11,7 @@
 #define X 3
 #define Y 4
 
-SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double Step, int weight) {
+SuperPixels::SuperPixels(Image *input,  int displayMode, int nbPixels, int nbSuperPixels, double Step, int weight, int iteration) {
     this->img = input;
     this->N = nbPixels;
     this->K = nbSuperPixels;
@@ -26,6 +26,11 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
     InitCenters();
     cout << centers.size() << " centres créés." << endl;
 
+    if(displayMode==0) {
+        DebugCenter();
+        return;
+    }
+
 
     /// 2 - Initialisation de la carte des superpixels et de la carte des distances.
     cout << "Initialisation de la carte des superpixels et de la carte des distances" << endl;
@@ -37,7 +42,7 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
      * Si la distance est plus petite que celle en mémoire pour le pixel, elle est modifiée en mémoire
      * et le pixel fait maintenant partie du superpixel.
      */
-    for(int b=0; b < 10; b++) {
+    for(int b=0; b < iteration; b++) {
         cout << "Loop " << b << endl;
         for (int j = 0; j < img->nW; j++) {
             for (int k = 0;k < img->nH; k++) {
@@ -118,7 +123,15 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
     cout << "Connectivity" << endl;
     Connectivity();
 
+
     cout << "Ecriture de l'image" << endl;
+    for(int x = 0; x < img->nW; x++) {
+        for(int y = 0; y < img->nH; y++) {
+            img->ImgData[y*3 * img->nW + (x*3)] = 0;
+            img->ImgData[y*3 * img->nW + (x*3 + 1)] = 0;
+            img->ImgData[y*3 * img->nW + (x*3 + 2)] = 0;
+        }
+    }
     for(int x = 0; x < img->nW; x++) {
         for(int y = 0; y < img->nH; y++) {
             Center* c = centers[clusters[x][y]];
@@ -127,6 +140,9 @@ SuperPixels::SuperPixels(Image *input, int nbPixels, int nbSuperPixels, double S
             img->ImgData[y*3 * img->nW + (x*3 + 2)] = c->pB;
         }
     }
+
+    if(displayMode==2)
+        DrawContour();
 
     
 }
@@ -328,11 +344,17 @@ void SuperPixels::DebugCenter() {
             img->ImgData[y*3 * img->nW + (x*3 + 2)] = 0;
         }
     }
+    int radius=5;
     for(Center* c : centers) {
         for (int k = 0; k < 8; k++) {
-            int x = c->x + dx[k];
-            int y = c->y + dy[k];
-            img->ImgData[y*3 * img->nW + (x*3)] = 255;
+            for(int r=1; r < radius; r++) {
+                int x = c->x + (dx[k]*r);
+                int y = c->y + (dy[k]*r);
+                if (x >= 0 && x < img->nW && y >= 0 && y < img->nH) {
+                    img->ImgData[y*3 * img->nW + (x*3)] = 255;
+                }
+
+            }
         }
         
     }

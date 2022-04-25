@@ -50,7 +50,7 @@ private:
     vector<Pixel*> GetPixels();
 
 public:
-    SuperPixels(Image* input, int nbPixels, int nbSuperPixels, double Step, int weight);
+    SuperPixels(Image* input, int displayMode, int nbPixels, int nbSuperPixels, double Step, int weight, int iteration);
     void DrawContour();
     Image* GetImage();
 };

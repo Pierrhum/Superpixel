@@ -25,7 +25,7 @@ public:
 
     Image() {};
     Image(char* fileName);
-    Image* ToSuperPixelsBySLIC(int K, int m, bool displayContour);
+    Image* ToSuperPixelsBySLIC(int K, int m, int displayMode, int iteration);
     void WriteFile(char* fileName);
     void rle_encode(const OCTET* data, const uint data_length, std::vector<uint>& encoded_data);
     void rle_decode(const std::vector<uint>& encoded_data, OCTET** decoded_data, uint& decoded_data_length);
