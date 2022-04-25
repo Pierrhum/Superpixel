@@ -1,23 +1,40 @@
+#include <iostream>
+#include <vector>
 #include "Image.h"
 
 int main(int argc, char* argv[])
 {
-  char cNomImgLue[250], cNomImgEcrite[250] = "../output.ppm";
-  int displayContour, K, m;
-  
-  if (argc != 5)
-     {
-       printf("Usage: img[ImageIn] displayContour[0=true] K[Regions] m[Weight] \n"); 
-       exit (1) ;
-     }
-   
-   sscanf (argv[1],"%s",cNomImgLue);
-   sscanf (argv[2],"%d",&displayContour);
-   sscanf (argv[3],"%d",&K);
-   sscanf (argv[4],"%d",&m);
+    char cNomImgLue[250], cNomImgEcrite[250] = "../output.ppm";
+    int displayContour, K, m;
 
-   Image *input = new Image(cNomImgLue);
-   Image *output = input->ToSuperPixelsBySLIC(K, m, displayContour);
-   output->WriteFile(cNomImgEcrite);
-   free(output->ImgData);
+    if (argc != 5) 
+    {
+        printf("Usage: img[ImageIn] displayContour[0=true] K[Regions] m[Weight] \n"); 
+        exit (1) ;
+    }
+   
+    sscanf (argv[1],"%s",cNomImgLue);
+    sscanf (argv[2],"%d",&displayContour);
+    sscanf (argv[3],"%d",&K);
+    sscanf (argv[4],"%d",&m);
+
+    Image *input = new Image(cNomImgLue);
+    
+    Image *output = input->ToSuperPixelsBySLIC(K, m, displayContour);
+    
+    std::vector<uint> encoded_output;
+
+    output->rle_encode(output->ImgData,output->nTaille3,encoded_output);
+
+    OCTET* decoded_output;
+    uint decoded_output_length;
+
+    output->rle_decode(encoded_output,&decoded_output,decoded_output_length);
+
+    std::cout << output->nTaille3 << " > " << encoded_output.size() << " > " << decoded_output_length << std::endl;
+
+    output->WriteFile(cNomImgEcrite);
+    
+    free(output->ImgData);
+    free(decoded_output);
 }
