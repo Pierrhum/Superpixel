@@ -14,46 +14,32 @@
 
 using namespace std;
 
-struct Pixel {
-    int pR=0;
-    int pG=0;
-    int pB=0;
+struct Color {
+    int R=0;
+    int G=0;
+    int B=0;
 };
 
-struct Center {
-    int pR=0;
-    int pG=0;
-    int pB=0;
+struct Pixel {
+    int cluster = 0;
+    float dist = FLT_MAX;
     int x=0;
     int y=0;
+    Color color;
 };
 
-class SuperPixels {
-private:
-    int N;
-    int K;
-    int m;
-    double S;
-    Image *img;
-
-    vector<Pixel*> pixels;
-    vector< Center* > centers;
-    vector<vector<int>> clusters;
-    vector<vector<float>> distances;
-
-    void InitCenters();
-    vector<int> AdaptCenter(int x, int y);
-    void InitClusters();
-    void DebugCenter();
-    void Connectivity();
-    double GetDistance(Center* Ck, int Xi, int Yi);
-    vector<Pixel*> GetPixels();
-
+class SuperPixel {
 public:
-    SuperPixels(Image* input, int nbPixels, int nbSuperPixels, double Step, int weight);
-    void DrawContour();
-    Image* GetImage();
+    Pixel* center;
+    Color color;
+    vector<Pixel*> pixels;
+    SuperPixel(Pixel* center);
+    bool AddPixel(vector< Pixel* > Pixels, int nW, int nH, int m, double S);
+    double GetDistance(Pixel* pix, int m, double S);
+    void Draw(Image* img);
 };
+
+
 
 
 #endif //CODE_SUPERPIXELS_H

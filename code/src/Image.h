@@ -24,7 +24,7 @@ public:
 
     Image() {};
     Image(char* fileName);
-    Image* ToSuperPixelsBySLIC(int K, int m, bool displayContour);
+    Image* ToSuperPixelsBySLIC(int K, int m, int displayMode);
     void WriteFile(char* fileName);
 };
 

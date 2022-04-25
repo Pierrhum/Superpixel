@@ -1,5 +1,5 @@
 #include "Image.h"
-#include "SuperPixels.h"
+#include "SLIC.h"
 
 Image::Image(char* fileName) {
     // Lecture de l'image et initialisation des variables
@@ -10,7 +10,7 @@ Image::Image(char* fileName) {
     lire_image_ppm(fileName, ImgData, nH * nW);
 }
 
-Image* Image::ToSuperPixelsBySLIC(int K, int m, bool displayContour) {
+Image* Image::ToSuperPixelsBySLIC(int K, int m, int displayMode) {
     // Copie de l'input
     Image* img = new Image();
     img->ImgData = ImgData;
@@ -20,9 +20,7 @@ Image* Image::ToSuperPixelsBySLIC(int K, int m, bool displayContour) {
     img->nTaille3 = nTaille3;
 
     // Création de l'image en Superpixels
-    SuperPixels output = SuperPixels(img, img->nTaille, K, sqrt((nTaille)/K), m);
-    if(displayContour)
-        output.DrawContour();
+    SLIC output = SLIC(img, displayMode, img->nTaille, K, sqrt((nTaille)/K), m);
 
     // Retourne l'image
     return output.GetImage();
