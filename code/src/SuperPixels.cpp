@@ -121,7 +121,8 @@ SuperPixels::SuperPixels(Image *input,  int displayMode, int nbPixels, int nbSup
     }
 
     cout << "Connectivity" << endl;
-    Connectivity();
+    if(displayMode<=2)
+        Connectivity();
 
 
     cout << "Ecriture de l'image" << endl;
@@ -230,7 +231,7 @@ void SuperPixels::InitCenters() {
 
             vector<int> centerPos = AdaptCenter(x,y);
 
-            Pixel* p = pixels[centerPos[1] * img->nW + centerPos[0]];
+            Pixel* p = pixels[y * img->nW + x];
 
             // Pixel à comparer
 
@@ -238,8 +239,8 @@ void SuperPixels::InitCenters() {
             c->pR = p->pR;
             c->pG = p->pG;
             c->pB = p->pB;
-            c->x = centerPos[0];
-            c->y = centerPos[1];
+            c->x = x;
+            c->y = y;
 
             centers.push_back(c);
         }
@@ -295,7 +296,7 @@ void SuperPixels::InitClusters() {
 double SuperPixels::GetDistance(Center* Ck, int Xi, int Yi) {
     
     // Pixel à comparer
-    Pixel* pix = pixels[Yi * img->nH + Xi]; 
+    Pixel* pix = pixels[Yi * img->nW + Xi]; 
 
     // Calcul de la distance
     double dRGB = sqrt(pow(Ck->pR - pix->pR, 2) + pow(Ck->pG - pix->pG, 2) + pow(Ck->pB - pix->pB, 2));
