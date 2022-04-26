@@ -19,6 +19,22 @@ SuperPixels::SuperPixels(Image *input,  int displayMode, int nbPixels, int nbSup
     this->m = weight;
     this->pixels = GetPixels();
 
+    string mode;
+    switch(displayMode) {
+        case 0:
+            mode = "Center";
+            break;
+        case 1:
+            mode = "Normal";
+            break;
+        case 2:
+            mode = "Contour";
+            break;
+        default:
+            mode = "Without Connectivity";
+            break;
+    }
+
     /** ALGO SLIC **/
     
     /// 1 - Initialisation des centres des superpixels.
@@ -43,12 +59,24 @@ SuperPixels::SuperPixels(Image *input,  int displayMode, int nbPixels, int nbSup
      * et le pixel fait maintenant partie du superpixel.
      */
     for(int b=0; b < iteration; b++) {
-        cout << "Loop " << b << endl;
+        cout << "\x1B[2J\x1B[H";
+        cout << "Mode " << mode << endl;
+        float progress = (float)b/(iteration-1);
+        int barWidth = 70;
+        cout << "[";
+        int pos = barWidth * progress;
+        for (int i = 0; i < barWidth; ++i) {
+            if (i < pos) cout << "=";
+            else if (i == pos) cout << ">";
+            else cout << " ";
+        }
+        cout << "] " << int(progress * 100.0) << " %" << endl;
         for (int j = 0; j < img->nW; j++) {
             for (int k = 0;k < img->nH; k++) {
                 distances[j][k] = FLT_MAX;
             }
         }
+        cout << "Loop " << b+1 << endl;
         cout << "Calcul des distances" << endl;
         for(int i = 0; i < centers.size(); i++) {
             /* Only compare to pixels in a 2 x step by 2 x step region. */
@@ -120,9 +148,11 @@ SuperPixels::SuperPixels(Image *input,  int displayMode, int nbPixels, int nbSup
       */
     }
 
-    cout << "Connectivity" << endl;
-    if(displayMode<=2)
+    cout << endl;
+    if(displayMode<=2) {
+        cout << "Connectivity" << endl;
         Connectivity();
+    }
 
 
     cout << "Ecriture de l'image" << endl;
@@ -142,8 +172,10 @@ SuperPixels::SuperPixels(Image *input,  int displayMode, int nbPixels, int nbSup
         }
     }
 
-    if(displayMode==2)
+    if(displayMode==2) {
+        cout << "Ecriture des contours" << endl;
         DrawContour();
+    }
 
     
 }
@@ -222,16 +254,12 @@ void SuperPixels::Connectivity() {
  */
 void SuperPixels::InitCenters() {
 
-
-    cout << img->nW / 2 << endl;
-    cout << S << endl;
-
-    for(int x = S; x <= img->nW - S/2; x+=S) {
-        for(int y = S; y <= img->nH - S/2; y+=S) {
+    for(int x = S/2; x <= img->nW - S/2; x+=S) {
+        for(int y = S/2; y <= img->nH - S/2; y+=S) {
 
             vector<int> centerPos = AdaptCenter(x,y);
 
-            Pixel* p = pixels[y * img->nW + x];
+            Pixel* p = pixels[centerPos[1] * img->nW + centerPos[0]];
 
             // Pixel à comparer
 
@@ -239,8 +267,8 @@ void SuperPixels::InitCenters() {
             c->pR = p->pR;
             c->pG = p->pG;
             c->pB = p->pB;
-            c->x = x;
-            c->y = y;
+            c->x = centerPos[0];
+            c->y = centerPos[1];
 
             centers.push_back(c);
         }
